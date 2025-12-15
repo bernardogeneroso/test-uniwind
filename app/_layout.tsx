@@ -1,16 +1,19 @@
+import './global.css';
+
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { HeroUINativeProvider } from 'heroui-native';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
-
-import { useColorScheme } from '@/components/useColorScheme';
+import { SafeAreaListener } from 'react-native-safe-area-context';
+import { Uniwind } from 'uniwind';
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -45,15 +48,42 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+// const jotaiStore = createStore();
 
+const JotaiProvider = ({ children }: { children: React.ReactNode }) => {
+  return children;
+
+  // return (
+  //   <ProviderJotai store={jotaiStore}>
+  //     {children}
+  //   </ProviderJotai>
+  // )
+}
+
+function RootLayoutNav() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaListener
+        onChange={({ insets }) => {
+          Uniwind.updateInsets(insets)
+        }}
+      >
+        <HeroUINativeProvider>
+          <JotaiProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              {/* App shell */}
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+              {/* Modal & not-found (já tinhas isto provavelmente) */}
+              <Stack.Screen
+                name="modal"
+                options={{ presentation: 'modal' }}
+              />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </JotaiProvider>
+        </HeroUINativeProvider>
+      </SafeAreaListener>
+    </GestureHandlerRootView>
   );
 }
