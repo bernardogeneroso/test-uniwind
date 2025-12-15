@@ -5,6 +5,40 @@ const { withUniwindConfig } = require("uniwind/metro");
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
+// Add wasm asset support
+config.resolver.assetExts.push('wasm');
+
+// Selectively enable package exports for Uniwind and jotai
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // uniwind and its dependency (jotai) require unstable_enablePackageExports to be true
+  if (['uniwind', 'jotai'].some((prefix) => moduleName.startsWith(prefix))) {
+    const newContext = {
+      ...context,
+      unstable_enablePackageExports: true,
+    };
+
+    return context.resolveRequest(newContext, moduleName, platform);
+  }
+
+  // default behavior for everything else
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+config.resolver.unstable_conditionNames = [
+  'browser',
+  'require',
+  'react-native',
+]
+ 
+// Add COEP and COOP headers to support SharedArrayBuffer
+config.server.enhanceMiddleware = (middleware) => {
+  return (req, res, next) => {
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    middleware(req, res, next);
+  };
+};
+
 module.exports = withUniwindConfig(config, {
   cssEntryFile: "./app/global.css",
   dtsFile: "./uniwind-types.d.ts",
