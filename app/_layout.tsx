@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { HeroUINativeProvider } from 'heroui-native';
+import { createStore, Provider as ProviderJotai } from 'jotai';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
@@ -48,16 +49,16 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-// const jotaiStore = createStore();
+const jotaiStore = createStore();
 
 const JotaiProvider = ({ children }: { children: React.ReactNode }) => {
-  return children;
+  // return children;
 
-  // return (
-  //   <ProviderJotai store={jotaiStore}>
-  //     {children}
-  //   </ProviderJotai>
-  // )
+  return (
+    <ProviderJotai store={jotaiStore}>
+      {children}
+    </ProviderJotai>
+  )
 }
 
 function RootLayoutNav() {
